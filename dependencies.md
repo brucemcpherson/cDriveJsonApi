@@ -1,5 +1,5 @@
 # Google Apps Script Project: cDriveJsonApi
-This repo (cDriveJsonApi) was automatically updated on 02 March 2015 19:33:14 GMT by GasGit
+This repo (cDriveJsonApi) was automatically updated on 23 April 2015 20:11:25 BST by GasGit
 
 For more information see the [desktop liberation site](http://ramblings.mcpher.com/Home/excelquirks/drivesdk/gettinggithubready "desktop liberation") or [contact me on G+](https://plus.google.com/+BruceMcpherson "Bruce McPherson - GDE")
 ## Details for Apps Script project cDriveJsonApi
@@ -12,15 +12,9 @@ The shared link for [cDriveJsonApi is here](https://script.google.com/d/1P0ZbhWV
 Code| server_js
 forPublishing| server_js
 ### Directly referenced libraries
-*library*|*identifier*|*key*|*version*|*dev mode*|*source*|
---- | --- | --- | --- | --- | --- 
-cUrlResult| cUrlResult|M59PE-C_VqcthwNDmXB9gsCz3TLx7pV4j|11|no|[here](libraries/cUrlResult "library source")
-cUseful| cUseful|Mcbr-v4SsYKJP7JMohttAZyz3TLx7pV4j|23|no|[here](libraries/cUseful "library source")
+no libraries discovered
 ### All dependencies and sub dependencies
-*library*|*identifier*|*key*|*version*|*dev mode*|*source*|
---- | --- | --- | --- | --- | --- 
-cUrlResult| cUrlResult|M59PE-C_VqcthwNDmXB9gsCz3TLx7pV4j|11|no|[here](libraries/cUrlResult "library source")
-cUseful| cUseful|Mcbr-v4SsYKJP7JMohttAZyz3TLx7pV4j|23|no|[here](libraries/cUseful "library source")
+no libraries discovered
 ### Enabled Google Services
 no libraries discovered
 ###Need more detail ?
