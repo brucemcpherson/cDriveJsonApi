@@ -9,7 +9,7 @@ function getLibraryInfo () {
   return { 
     info: {
       name:'cUrlResult',
-      version:'0.0.2',
+      version:'0.1.5',
       key:'M59PE-C_VqcthwNDmXB9gsCz3TLx7pV4j',
       description:'urlfetch utilities',
       share:'https://script.google.com/d/1NtAiJulZM4DssyN0HcK2XXTnykN_Ir2ee2pXV-CT367nKbdbTvRX4pTM/edit?usp=sharing'
@@ -25,15 +25,17 @@ function getLibraryInfo () {
   * @param {string} url the url
   * @param {string} optAccessToken an optional access token
   * @param {string} overrideOptions optional additional options
-  * @param {function} optChecker for rate limit checking
+  * @param {function} optLookahead for rate limit checking
+  * @param {cCacheHandler} optCache cachehandler to use 
   * @return {HTTPResponse}
   */
-function urlGet (url, optAccessToken,overrideOptions, optChecker) {
+function urlGet (url, optAccessToken,overrideOptions, optLookahead,optCache) {
   return urlExecute( url , {
     method:"GET",
     muteHttpExceptions:true
-  }, optAccessToken , optChecker );
+  }, optAccessToken , overrideOptions, optLookahead,optCache );
 }
+
 
 /**
 * execute a post
@@ -42,10 +44,11 @@ function urlGet (url, optAccessToken,overrideOptions, optChecker) {
 * @param {string} optMethod the method
 * @param {string} optAccessToken an optional access token
 * @param {string} overrideOptions optional additional options
-* @param {function} optChecker for rate limit checking
+* @param {function} optLookahead for rate limit checking
+* @param {cCacheHandler} optCache cachehandler to use 
 * @return {HTTPResponse}
 */
-function urlPost (url,payload,optMethod,optAccessToken,overrideOptions,optChecker) {
+function urlPost (url,payload,optMethod,optAccessToken,overrideOptions,optLookahead,optCache) {
   
   var options = {};
   options.method = optMethod || "POST",
@@ -60,7 +63,7 @@ function urlPost (url,payload,optMethod,optAccessToken,overrideOptions,optChecke
       options.payload = payload;
     }
   }
-  return urlExecute( url , options , optAccessToken, overrideOptions,optChecker);
+  return urlExecute( url , options , optAccessToken, overrideOptions,optLookahead,optCache);
 }
   
 /**
@@ -69,10 +72,12 @@ function urlPost (url,payload,optMethod,optAccessToken,overrideOptions,optChecke
 * @param {object} options any additional options
 * @param {string} optAccessToken an optional access token
 * @param {string} overrideOptions optional additional options
-* @param {function} optChecker for rate limit checking
+* @param {function} optLookahead for rate limit checking
+* @param {cCacheHandler} optCache cachehandler to use 
 * @return {object} a standard response
 */
-function urlExecute (url, options , optAccessToken,overrideOptions,optChecker) {
+function urlExecute (url, options , optAccessToken,overrideOptions,optLookahead,optCache) {
+
   var options = options || {};
   options.headers = options.headers || {};
   if (optAccessToken) {
@@ -80,13 +85,33 @@ function urlExecute (url, options , optAccessToken,overrideOptions,optChecker) {
   }
   
   var finalOptions = cUseful.extend( overrideOptions ? cUseful.clone(overrideOptions) :  {} , options);
-
-  // make a standard response object
-  var result = cUseful.rateLimitExpBackoff(function() {
-    return UrlFetchApp.fetch(url, finalOptions);
-  }, undefined ,  undefined, undefined , undefined , optChecker);
   
-  return makeResults(result,url);
+  // whether to cache this 
+  var cache = finalOptions.method === "GET" && optCache ? optCache : undefined;
+    
+  // if this is caching then try there first
+  if (cache) {
+    var result = cache.getCache (url,finalOptions);
+    if (result) { 
+      result.fromCache = true;
+      return result;
+    }  
+  }
+  
+  // make a standard response object
+  var result = cUseful.Utils.expBackoff(function() {
+    return UrlFetchApp.fetch(url, finalOptions);
+  }, {
+    lookahead:optLookahead
+  });
+  
+  // write it to cache if using
+  var mr = makeResults(result,url);
+  if(optCache && finalOptions.method === "GET") {
+    cache.putCache (mr,url,finalOptions)
+  }
+  
+  return mr;
 }
   
 /**
